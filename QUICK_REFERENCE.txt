@@ -1,0 +1,48 @@
+
+AMATS QUICK REFERENCE CARD
+===========================
+
+SETUP (One-time)
+----------------
+Windows: Double-click setup_windows.bat
+Linux/Mac: ./setup_linux.sh
+Manual: python setup.py
+
+RUN SERVER
+----------
+python manage.py runserver
+Access: http://127.0.0.1:8000
+
+DEFAULT LOGINS
+--------------
+Admin:     admin / admin123
+Technician: tech  / tech123
+
+COMMON COMMANDS
+---------------
+python manage.py scan_network --subnet 192.168.1.0/24
+python manage.py check_overdue
+python manage.py generate_report --type inventory --output report.csv
+
+DIRECTORY STRUCTURE
+-------------------
+amats_project/     Django project configuration
+asset_management/  Main application (MVT)
+network_scanner/   MAC address detection module
+templates/         HTML templates
+static/            CSS, JS, images
+logs/              Application logs
+media/             User uploads
+
+KEY FILES
+---------
+manage.py          Django command line
+requirements.txt   Python dependencies
+.env               Environment variables (create from .env.example)
+settings.py        Main configuration
+
+SUPPORT
+-------
+See README.md for full documentation
+See DEPLOYMENT_GUIDE.md for production setup
+See IMPLEMENTATION_SUMMARY.txt for project details

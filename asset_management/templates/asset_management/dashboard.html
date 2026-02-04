@@ -1,0 +1,162 @@
+{% extends 'asset_management/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Page Header -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold text-primary mb-1">
+                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                </h2>
+                <p class="text-muted mb-0">Welcome back, {{ user.get_full_name|default:user.username }}!</p>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="badge bg-primary fs-6 me-3">
+                    <i class="bi bi-clock me-1"></i>{{ now|date:"F j, Y - g:i A" }}
+                </span>
+                {% include 'asset_management/_notifications.html' %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="col-md-2 col-6">
+        <div class="card bg-primary text-white border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-box-seam display-4 mb-2"></i>
+                <h3 class="fw-bold mb-0">{{ stats.total }}</h3>
+                <small>Total Assets</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="card bg-success text-white border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-check-circle display-4 mb-2"></i>
+                <h3 class="fw-bold mb-0">{{ stats.available }}</h3>
+                <small>Available</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="card bg-warning text-dark border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-person-check display-4 mb-2"></i>
+                <h3 class="fw-bold mb-0">{{ stats.assigned }}</h3>
+                <small>Assigned</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="card bg-danger text-white border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-exclamation-triangle display-4 mb-2"></i>
+                <h3 class="fw-bold mb-0">{{ stats.missing }}</h3>
+                <small>Missing</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="card bg-info text-white border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-tools display-4 mb-2"></i>
+                <h3 class="fw-bold mb-0">{{ stats.maintenance }}</h3>
+                <small>Maintenance</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="card bg-secondary text-white border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-clock-history display-4 mb-2"></i>
+                <h3 class="fw-bold mb-0">{{ overdue_assignments|length }}</h3>
+                <small>Overdue</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions & Alerts -->
+    <div class="col-lg-8">
+        <!-- Recent Activity -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-activity me-2"></i>Recent Activity</h5>
+                {% if user.id == 1 %}
+                <a href="{% url 'audit_logs' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Time</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in recent_logs %}
+                            <tr>
+                                <td class="text-muted small">{{ log.timestamp|timesince }} ago</td>
+                                <td>{{ log.user.get_full_name|default:log.user.username }}</td>
+                                <td>
+                                    <span class="badge bg-{% if log.action == 'CREATE' %}success{% elif log.action == 'DELETE' %}danger{% elif log.action == 'ISSUE' %}primary{% elif log.action == 'RETURN' %}warning{% else %}info{% endif %}">
+                                        {{ log.get_action_display }}
+                                    </span>
+                                </td>
+                                <td class="small">{{ log.description|truncatechars:50 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3">No recent activity</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-lightning me-2"></i>Quick Actions
+            </div>
+            <div class="card-body">
+                {% if user.id == 1 %}
+                <a href="{% url 'asset_create' %}" class="btn btn-outline-primary w-100 mb-2">
+                    <i class="bi bi-plus-circle me-2"></i>Add New Asset
+                </a>
+                {% endif %}
+                <a href="{% url 'asset_list' %}" class="btn btn-outline-success w-100 mb-2">
+                    <i class="bi bi-search me-2"></i>Browse Assets
+                </a>
+                {% if user.id == 1 %}
+                <a href="{% url 'network_scan' %}" class="btn btn-outline-info w-100 mb-2">
+                    <i class="bi bi-wifi me-2"></i>Network Scan
+                </a>
+                {% endif %}
+                <a href="{% url 'generate_report' %}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-file-earmark-text me-2"></i>Generate Report
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-refresh dashboard every 5 minutes
+    setTimeout(function() {
+        window.location.reload();
+    }, 300000);
+</script>
+{% endblock %}

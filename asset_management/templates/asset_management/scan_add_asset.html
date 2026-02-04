@@ -1,0 +1,146 @@
+{% extends 'asset_management/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-primary mb-4">
+        <i class="bi bi-qr-code-scan me-2"></i>Scan to Add Asset
+    </h2>
+    <p class="text-muted">Scan a QR code to quickly add a new asset to the system.</p>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-camera-fill me-2"></i>Scan Asset QR Code
+                </div>
+                <div class="card-body text-center">
+                    <!-- Start Section -->
+                    <div id="start-section">
+                        <button class="btn btn-lg btn-success mb-3" onclick="startScanner()">
+                            <i class="bi bi-camera-fill me-2"></i>Start Scanning
+                        </button>
+                        <p class="text-muted">Click to scan a new asset's QR code</p>
+                    </div>
+                    
+                    <!-- Scanner Section -->
+                    <div id="scanner-section" style="display: none;">
+                        <div id="reader" style="width: 100%;"></div>
+                    </div>
+                    
+                    <div id="result" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-info-circle me-2"></i>How It Works
+                </div>
+                <div class="card-body">
+                    <ol>
+                        <li>Generate a QR code with asset tag and serial number</li>
+                        <li>Click "Start Scanning" to activate camera</li>
+                        <li>Point camera at the QR code</li>
+                        <li>System automatically creates the asset</li>
+                        <li>You'll be redirected to edit and complete details</li>
+                    </ol>
+                    <div class="alert alert-info mt-3">
+                        <strong>Tip:</strong> Use external QR generators or pre-printed labels with format:<br>
+                        <code>AMATS|UTV-LAP-002|SN123456</code>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <i class="bi bi-keyboard me-2"></i>Manual Entry
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">QR Code Data</label>
+                            <input type="text" name="qr_data" class="form-control" placeholder="AMATS|TAG|SERIAL">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Asset</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Scanner Library -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<script>
+let html5QrcodeScanner = null;
+
+function startScanner() {
+    document.getElementById('start-section').style.display = 'none';
+    document.getElementById('scanner-section').style.display = 'block';
+    document.getElementById('result').innerHTML = '';
+    
+    html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader",
+        { fps: 10, qrbox: {width: 250, height: 250} },
+        false
+    );
+    
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+}
+
+function onScanSuccess(decodedText, decodedResult) {
+    document.getElementById('result').innerHTML = 
+        '<div class="alert alert-info"><i class="bi bi-arrow-repeat spin me-2"></i>Creating asset...</div>';
+    
+    // Submit form via AJAX
+    fetch("", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: 'qr_data=' + encodeURIComponent(decodedText)
+    })
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else {
+            return response.text();
+        }
+    })
+    .then(html => {
+        if (html) {
+            // Parse error message from HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const messages = doc.querySelectorAll('.alert');
+            if (messages.length > 0) {
+                document.getElementById('result').innerHTML = messages[0].outerHTML;
+            }
+        }
+    })
+    .catch(error => {
+        document.getElementById('result').innerHTML = 
+            '<div class="alert alert-danger">Error: ' + error + '</div>';
+    });
+}
+
+function onScanFailure(error) {
+    // Silently ignore
+}
+</script>
+
+<style>
+.spin {
+    animation: spin 1s linear infinite;
+    display: inline-block;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}

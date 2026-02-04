@@ -1,0 +1,21 @@
+{% extends 'asset_management/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-primary mb-4">
+        <i class="bi bi-wifi me-2"></i>Network Scanner
+    </h2>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-gear me-2"></i>Scan Configuration
+                </div>
+                <div class="card-body">
+                    <form method="post" id="scan-form">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Subnet</label>
+                            <input type="text" name="subnet" class="form-control" value="192.168.1.0/24" placeholder="192.168.1.0/24">
+                            <div class="form-text">Enter network

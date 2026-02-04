@@ -1,0 +1,154 @@
+{% extends 'asset_management/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'asset_list' %}">Assets</a></li>
+            <li class="breadcrumb-item active">{{ asset.asset_tag }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h2 class="text-primary mb-0">{{ asset.asset_tag }}</h2>
+            <p class="lead">{{ asset.name }}</p>
+            <div>
+                <span class="badge bg-{% if asset.status == 'AVAILABLE' %}success{% elif asset.status == 'ASSIGNED' %}warning{% elif asset.status == 'MISSING' %}danger{% elif asset.status == 'MAINTENANCE' %}info{% else %}secondary{% endif %} me-2">
+                    {{ asset.get_status_display }}
+                </span>
+                <span class="badge bg-{% if asset.condition == 'EXCELLENT' %}success{% elif asset.condition == 'GOOD' %}primary{% elif asset.condition == 'FAIR' %}warning{% else %}danger{% endif %}">
+                    {{ asset.get_condition_display }}
+                </span>
+            </div>
+        </div>
+        <div>
+            {% if asset.status == 'AVAILABLE' %}
+            <a href="{% url 'issue_asset' asset.pk %}" class="btn btn-success">Issue Asset</a>
+            {% endif %}
+            {% if user.id == 1 %}
+            <a href="{% url 'asset_edit' asset.pk %}" class="btn btn-warning">Edit</a>
+            <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">Asset Information</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr><td class="text-muted">Category:</td><td>{{ asset.category|default:"-" }}</td></tr>
+                                <tr><td class="text-muted">Serial Number:</td><td>{{ asset.serial_number|default:"-" }}</td></tr>
+                                <tr><td class="text-muted">Model:</td><td>{{ asset.model|default:"-" }}</td></tr>
+                                <tr><td class="text-muted">Manufacturer:</td><td>{{ asset.manufacturer|default:"-" }}</td></tr>
+                                <tr><td class="text-muted">MAC Address:</td><td class="font-monospace">{{ asset.mac_address|default:"-" }}</td></tr>
+                                <tr><td class="text-muted">IP Address:</td><td class="font-monospace">{{ asset.ip_address|default:"-" }}</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr><td class="text-muted">Location:</td><td>{{ asset.location }}</td></tr>
+                                <tr><td class="text-muted">Purchase Date:</td><td>{{ asset.purchase_date|default:"-" }}</td></tr>
+                                <tr><td class="text-muted">Warranty Expiry:</td><td>{{ asset.warranty_expiry|default:"-" }}</td></tr>
+                                <tr><td class="text-muted">Network Last Seen:</td><td>{% if asset.network_last_seen %}{{ asset.network_last_seen|timesince }} ago{% else %}Never{% endif %}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Assignment History</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr><th>Type</th><th>To User</th><th>By Admin</th><th>Date Out</th><th>Date Returned</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for assignment in assignment_history %}
+                            <tr>
+                                <td><span class="badge bg-primary">{{ assignment.get_assignment_type_display }}</span></td>
+                                <td>{{ assignment.assigned_to.username }}</td>
+                                <td>{{ assignment.assigned_by.username }}</td>
+                                <td>{{ assignment.date_out|date:"M d, Y" }}</td>
+                                <td>{% if assignment.date_returned %}{{ assignment.date_returned|date:"M d, Y" }}{% else %}<span class="badge bg-warning">Not Returned</span>{% endif %}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center text-muted py-3">No assignment history</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            {% if asset.assigned_to %}
+            <div class="card bg-warning bg-opacity-10 mb-4">
+                <div class="card-header bg-warning">Currently Assigned</div>
+                <div class="card-body">
+                    <h5>{{ asset.assigned_to.username }}</h5>
+                    <p>Assigned: {{ asset.date_assigned|date:"M d, Y" }}</p>
+                    <p>Duration: {{ asset.date_assigned|timesince }}</p>
+                    {% for assignment in assignment_history %}
+                        {% if not assignment.date_returned %}
+                        <a href="{% url 'return_asset' assignment.id %}" class="btn btn-warning w-100">Return Asset</a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- QR Code Section -->
+            <div class="card mb-4">
+                <div class="card-header">QR Code</div>
+                <div class="card-body text-center">
+                    {% if asset.qr_code %}
+                    <img src="{{ asset.qr_code.url }}" alt="QR Code" class="img-fluid mb-2" style="max-width: 200px;">
+                    <br>
+                    <a href="{{ asset.qr_code.url }}" download class="btn btn-sm btn-outline-primary">Download</a>
+                    {% else %}
+                    <p class="text-muted">No QR code generated</p>
+                    <a href="{% url 'generate_qr' asset.pk %}" class="btn btn-primary btn-sm">Generate QR Code</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong>{{ asset.asset_tag }}</strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{% url 'asset_delete' asset.pk %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Asset</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete() {
+    var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+}
+</script>
+{% endblock %}

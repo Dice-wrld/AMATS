@@ -1,0 +1,99 @@
+{% extends 'asset_management/base.html' %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="fw-bold text-primary">
+                <i class="bi bi-journal-text me-2"></i>Audit Logs
+            </h2>
+            <div class="btn-group">
+                <a href="?days=7" class="btn btn-outline-primary btn-sm {% if request.GET.days == '7' %}active{% endif %}">7 Days</a>
+                <a href="?days=30" class="btn btn-outline-primary btn-sm {% if request.GET.days == '30' or not request.GET.days %}active{% endif %}">30 Days</a>
+                <a href="?days=90" class="btn btn-outline-primary btn-sm {% if request.GET.days == '90' %}active{% endif %}">90 Days</a>
+            </div>
+        </div>
+        <p class="text-muted">Complete system activity trail for compliance and security monitoring.</p>
+    </div>
+
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Object</th>
+                                <th>Description</th>
+                                <th>IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs %}
+                            <tr>
+                                <td class="text-nowrap">{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+                                <td>
+                                    {% if log.user %}
+                                    {{ log.user.get_full_name|default:log.user.username }}
+                                    {% else %}
+                                    <span class="text-muted">System</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if log.action == 'CREATE' %}success{% elif log.action == 'DELETE' %}danger{% elif log.action == 'UPDATE' %}primary{% elif log.action == 'LOGIN' %}info{% elif log.action == 'ISSUE' %}primary{% elif log.action == 'RETURN' %}warning{% else %}secondary{% endif %}">
+                                        {{ log.get_action_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if log.model_name %}
+                                    <small class="text-muted">{{ log.model_name }}</small>
+                                    {% if log.object_id %}
+                                    <small class="text-muted">#{{ log.object_id }}</small>
+                                    {% endif %}
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="small">{{ log.description }}</td>
+                                <td class="font-monospace small">{{ log.ip_address|default:"-" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox display-4 d-block mb-2"></i>
+                                    No audit logs found for the selected period
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if is_paginated %}
+            <div class="card-footer bg-white">
+                <nav>
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
+                        </li>
+                        {% endif %}
+                        <li class="page-item active">
+                            <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                        </li>
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

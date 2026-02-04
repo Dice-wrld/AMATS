@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  web:
+    build: ./
+    command: gunicorn amats_project.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ./:/app
+      - static_volume:/vol/web/static
+      - media_volume:/vol/web/media
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: amats
+      POSTGRES_USER: amats_user
+      POSTGRES_PASSWORD: changeme
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  network_scanner:
+    build: ./
+    command: python network_scanner/scanner.py
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+
+  worker:
+    build: ./
+    command: celery -A amats_project worker -l info
+    depends_on:
+      - redis
+      - db
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+
+  beat:
+    build: ./
+    command: celery -A amats_project beat -l info
+    depends_on:
+      - redis
+      - db
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+
+volumes:
+  db_data:
+  static_volume:
+  media_volume:

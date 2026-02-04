@@ -1,0 +1,97 @@
+{% extends 'asset_management/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-primary mb-4">
+        <i class="bi bi-file-earmark-bar-graph me-2"></i>Reports
+    </h2>
+    <p class="text-muted">Generate and export system reports for audit and management purposes.</p>
+
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-box-seam text-primary fs-1"></i>
+                    </div>
+                    <h5 class="card-title">Inventory Report</h5>
+                    <p class="card-text text-muted small">Complete list of all assets with status, condition, and assignment details.</p>
+                    <form method="post" class="mt-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="report_type" value="inventory">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-download me-2"></i>Download CSV
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-arrow-left-right text-success fs-1"></i>
+                    </div>
+                    <h5 class="card-title">Assignment History</h5>
+                    <p class="card-text text-muted small">Record of all asset issuances and returns with dates and users.</p>
+                    <form method="post" class="mt-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="report_type" value="assignments">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-download me-2"></i>Download CSV
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-exclamation-triangle text-warning fs-1"></i>
+                    </div>
+                    <h5 class="card-title">Overdue Assets</h5>
+                    <p class="card-text text-muted small">List of assets that are past their due date and need immediate attention.</p>
+                    <a href="{% url 'dashboard' %}" class="btn btn-warning w-100 mt-3">
+                        <i class="bi bi-eye me-2"></i>View on Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% if user.id == 1 %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-wifi text-info fs-1"></i>
+                    </div>
+                    <h5 class="card-title">Network Status</h5>
+                    <p class="card-text text-muted small">Assets detected on network vs. registered assets.</p>
+                    <a href="{% url 'network_scan' %}" class="btn btn-info w-100 mt-3 text-white">
+                        <i class="bi bi-search me-2"></i>Run Scan
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <div class="bg-secondary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-journal-text text-secondary fs-1"></i>
+                    </div>
+                    <h5 class="card-title">Audit Trail</h5>
+                    <p class="card-text text-muted small">Complete system activity log for compliance review.</p>
+                    <a href="{% url 'audit_logs' %}" class="btn btn-secondary w-100 mt-3">
+                        <i class="bi bi-list me-2"></i>View Logs
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

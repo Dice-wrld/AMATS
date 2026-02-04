@@ -1,0 +1,64 @@
+{% extends 'asset_management/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Issue Asset</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6>Asset Details</h6>
+                        <p class="mb-1"><strong>Tag:</strong> {{ asset.asset_tag }}</p>
+                        <p class="mb-1"><strong>Name:</strong> {{ asset.name }}</p>
+                        <p class="mb-0"><strong>Condition:</strong> {{ asset.get_condition_display }}</p>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Assign To *</label>
+                            <select name="assigned_to" class="form-select" required>
+                                <option value="">Select User</option>
+                                {% for user in form.assigned_to.field.queryset %}
+                                <option value="{{ user.id }}">{{ user.get_full_name|default:user.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Due Date</label>
+                            <input type="datetime-local" name="date_due" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Purpose *</label>
+                            <textarea name="purpose" class="form-control" rows="3" placeholder="Purpose of asset usage..." required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Condition Out</label>
+                            <select name="condition_out" class="form-select">
+                                {% for val, label in form.condition_out.field.choices %}
+                                <option value="{{ val }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea name="notes" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">Issue Asset</button>
+                        <a href="{% url 'asset_list' %}" class="btn btn-secondary ms-2">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

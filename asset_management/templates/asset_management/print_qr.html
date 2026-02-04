@@ -1,0 +1,22 @@
+{% extends 'asset_management/base.html' %}
+
+{% block content %}
+<div class="container mt-4 text-center">
+    <div class="card p-4">
+        <h4 class="mb-3">Print QR Label</h4>
+        <p class="text-muted">Asset: {{ asset.asset_tag }} — {{ asset.name }}</p>
+        <div class="mb-3">
+            {% if asset.qr_code %}
+                <img src="{{ asset.qr_code.url }}" alt="QR for {{ asset.asset_tag }}" style="width:260px;height:260px;"/>
+            {% else %}
+                <p class="text-danger">No QR code available.</p>
+            {% endif %}
+        </div>
+        <p class="small">Serial: {{ asset.serial_number }} | Location: {{ asset.location }}</p>
+        <div class="mt-4">
+            <button class="btn btn-primary" onclick="window.print()">Print Label</button>
+            <a class="btn btn-secondary ms-2" href="{% url 'asset_detail' asset.pk %}">Back</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

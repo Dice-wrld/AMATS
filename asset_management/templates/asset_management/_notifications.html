@@ -1,0 +1,21 @@
+<div class="dropdown">
+  <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+    Notifications <span class="badge bg-danger" id="notif-count">{{ unread_notifications_count }}</span>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="notifDropdown" style="min-width:300px;">
+    {% if notifications %}
+      {% for n in notifications %}
+        <li class="mb-2">
+          <a href="{{ n.link|default:'#' }}" class="d-block text-decoration-none">
+            <div class="small text-muted">{{ n.timestamp|date:"Y-m-d H:i" }}</div>
+            <div>{{ n.message|truncatechars:80 }}</div>
+          </a>
+        </li>
+      {% endfor %}
+    {% else %}
+      <li class="text-muted small">No notifications</li>
+    {% endif %}
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item text-center" href="{% url 'notifications_list' %}">View all</a></li>
+  </ul>
+</div>

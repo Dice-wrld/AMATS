@@ -8,6 +8,13 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Ensure logs directory exists so file handlers don't fail in CI/runners
+try:
+    (BASE_DIR / "logs").mkdir(parents=True, exist_ok=True)
+except Exception:
+    # Best-effort: if directory creation fails (e.g., permissions), continue
+    pass
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-amats-utv-ghana-field-study-2025')
 

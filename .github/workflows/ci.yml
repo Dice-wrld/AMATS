@@ -34,6 +34,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+      - name: Ensure logs directory
+        run: |
+          mkdir -p logs
+
     - name: Run migrations
       env:
         DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/test_db

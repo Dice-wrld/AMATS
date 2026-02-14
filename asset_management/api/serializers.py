@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from ..models import Asset, AssetCategory, AssetAssignment, AuditLog, MaintenanceRecord
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
 class UserSerializer(serializers.ModelSerializer):

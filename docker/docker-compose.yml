@@ -2,10 +2,12 @@ version: '3.8'
 
 services:
   web:
-    build: ./
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
     command: gunicorn amats_project.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - ./:/app
+      - ../:/app
       - static_volume:/vol/web/static
       - media_volume:/vol/web/media
     ports:
@@ -31,17 +33,21 @@ services:
       - "6379:6379"
 
   network_scanner:
-    build: ./
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
     command: python network_scanner/scanner.py
     depends_on:
       - db
     env_file:
       - .env
     volumes:
-      - ./:/app
+      - ../:/app
 
   worker:
-    build: ./
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
     command: celery -A amats_project worker -l info
     depends_on:
       - redis
@@ -49,10 +55,12 @@ services:
     env_file:
       - .env
     volumes:
-      - ./:/app
+      - ../:/app
 
   beat:
-    build: ./
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
     command: celery -A amats_project beat -l info
     depends_on:
       - redis
@@ -60,7 +68,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./:/app
+      - ../:/app
 
 volumes:
   db_data:

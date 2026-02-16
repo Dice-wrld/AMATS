@@ -1,4 +1,4 @@
-# AMATS - Access Management and Asset Tracking System
+# AMATS - Asset Management and Asset Tracking System
 
 ## UTV Ghana Field Study Project
 **Developed by:** Amissah Kevin Baiden  
@@ -11,7 +11,7 @@
 
 ## Overview
 
-AMATS (Access Management and Asset Tracking System) is a comprehensive web-based solution designed to address the security liabilities identified at the Information Technology Department of United Television (UTV) Ghana. The system provides computerized access management and asset tracking capabilities to replace manual logbook processes.
+AMATS (Asset Management and Asset Tracking System) is a comprehensive web-based solution designed to address the security liabilities identified at the Information Technology Department of United Television (UTV) Ghana. The system provides computerized access management and asset tracking capabilities to replace manual logbook processes.
 
 ## Features
 

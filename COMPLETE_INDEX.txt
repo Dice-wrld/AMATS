@@ -251,7 +251,6 @@ FUTURE ENHANCEMENTS
 ACCREDITATION
 =============
 Student: Amissah Kevin Baiden
-Student ID: 1685881199
 Programme: BSc Cyber Security
 Institution: Ghana Communication Technology University (GCTU)
 Department: Computer Science

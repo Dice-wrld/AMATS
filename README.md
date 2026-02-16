@@ -182,7 +182,6 @@ Academic Project - Ghana Communication Technology University
 ## Contact
 
 **Developer:** Amissah Kevin Baiden  
-**Student ID:** 1685881199  
 **Institution:** Ghana Communication Technology University  
 **Department:** Computer Science  
 **Program:** BSc Cyber Security
